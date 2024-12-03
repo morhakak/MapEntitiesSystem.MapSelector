@@ -11,20 +11,52 @@
     <div class="rounded-xl shadow-lg py-4 px-8">
       <div class="relative">
         <img
-          @click="publishEntityCoordinates"
+          @click="setCoordinates"
           src="https://cdn1.justfreeslide.com/2022/03/USA-Map-With-State-Names-ppt.jpeg"
           alt="usa map"
           class="w-full"
         />
         <div
+          v-if="mapWasClicked"
           class="absolute size-4 rounded-full bg-red-500"
-          :class="`top-[${coordinates.lat}px] left-[${coordinates.lon}px]`"
           :style="{
             left: `${coordinates.lon}px`,
             top: `${coordinates.lat}px`,
             transform: 'translate(-50%, -50%)',
           }"
         ></div>
+        <div class="h-8 w-12">
+          <Transition name="fade">
+            <input
+              v-if="mapWasClicked"
+              v-model="coordinates.title"
+              type="text"
+              placeholder="Location"
+              class="py-2 px-2 rounded-xl shadow-xl"
+              :style="{
+                position: 'absolute',
+                left: `calc(${coordinates.lon}px + 12%)`,
+                top: `${coordinates.lat}px`,
+                transform: 'translate(-50%, -50%)',
+              }"
+            />
+          </Transition>
+          <Transition name="fade">
+            <button
+              v-if="coordinates.title.length && mapWasClicked"
+              @click="publishEntityCoordinates"
+              class="absolute bg-green-700 py-2 px-4 rounded-xl text-white"
+              :style="{
+                position: 'absolute',
+                left: `calc(${coordinates.lon}px + 27%)`,
+                top: `${coordinates.lat}px`,
+                transform: 'translate(-50%, -50%)',
+              }"
+            >
+              Send
+            </button>
+          </Transition>
+        </div>
       </div>
     </div>
   </div>
@@ -34,17 +66,34 @@
 import { useMapSelectorStore } from '@/stores/mapsSelectorStore'
 import { ref } from 'vue'
 
+const mapWasClicked = ref(false)
+
 const mapSelectorStore = useMapSelectorStore()
 const coordinates = ref({
   title: '',
   lon: 0,
   lat: 0,
 })
-async function publishEntityCoordinates(e) {
-  ;(coordinates.value.lon = e.offsetX), (coordinates.value.lat = e.offsetY)
-  coordinates.value.title = 'test'
-  console.log(coordinates.value)
 
+function setCoordinates(e) {
+  mapWasClicked.value = true
+  ;(coordinates.value.lon = e.offsetX), (coordinates.value.lat = e.offsetY)
+}
+
+async function publishEntityCoordinates() {
   await mapSelectorStore.sendEntityCoordinates(coordinates.value)
+  coordinates.value.title = ''
 }
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
