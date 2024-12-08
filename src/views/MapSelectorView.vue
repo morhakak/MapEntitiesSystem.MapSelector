@@ -16,15 +16,15 @@
           alt="usa map"
           class="w-full"
         />
-        <div
+        <LocationIcon
           v-if="mapWasClicked"
-          class="absolute size-4 rounded-full bg-red-500"
+          class="absolute w-8 rounded-full shadow-xl fill-red-500"
           :style="{
             left: `${coordinates.lon}px`,
             top: `${coordinates.lat}px`,
             transform: 'translate(-50%, -50%)',
           }"
-        ></div>
+        />
         <div class="h-8 w-12">
           <Transition name="fade">
             <input
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+import LocationIcon from '@/components/LocationIcon.vue'
 import { useMapSelectorStore } from '@/stores/mapsSelectorStore'
 import { ref } from 'vue'
 
